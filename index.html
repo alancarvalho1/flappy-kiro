@@ -34,6 +34,11 @@
       image-rendering: crisp-edges;
       max-width: 100%;
       height: auto;
+      /* Taps on the canvas are game input: no scroll, zoom, selection or tap flash */
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     h1 {
@@ -149,7 +154,7 @@
     </div>
     <canvas id="gameCanvas"></canvas>
     <div id="info">
-      <p>Pressione ESPAÇO para pular | T para alternar temas</p>
+      <p>ESPAÇO ou toque/clique na tela para pular | T para alternar temas</p>
     </div>
     <div id="resolutionInfo"></div>
   </div>
@@ -169,7 +174,8 @@
 
       // Keyboard shortcut for theme cycling (T key)
       document.addEventListener('keydown', function(e) {
-        if (e.code === 'KeyT' && typeof window.gameEngine !== 'undefined') {
+        // Ignore auto-repeat so holding T doesn't spin through every theme
+        if (e.code === 'KeyT' && !e.repeat && typeof window.gameEngine !== 'undefined') {
           window.gameEngine.cycleTheme();
           // Update selector to match current theme
           themeSelector.value = window.gameEngine.getCurrentTheme();

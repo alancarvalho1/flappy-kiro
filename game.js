@@ -18,9 +18,10 @@ class ResponsiveCanvasManager {
     this.displayHeight = this.baseHeight;
     
     this.setupCanvas();
+    // Fill the resolution label first so its height is counted when sizing the canvas
+    this.displayResolutionInfo();
     this.updateCanvasSize();
     this.setupResizeListener();
-    this.displayResolutionInfo();
   }
 
   /**
@@ -36,9 +37,11 @@ class ResponsiveCanvasManager {
    * Maintains aspect ratio and respects maximum constraints
    */
   calculateCanvasSize() {
-    const padding = 20;
-    const maxWidth = window.innerWidth - padding;
-    const maxHeight = window.innerHeight - padding;
+    const padding = 20; // body padding (10px on each side)
+    // #gameContainer is limited to 90vw, so the canvas must fit inside that
+    const maxWidth = Math.min(window.innerWidth * 0.9, window.innerWidth - padding);
+    // Leave room for the header and the instructions around the canvas
+    const maxHeight = window.innerHeight - padding - this.getReservedHeight();
 
     // Calculate size to fit within viewport while maintaining aspect ratio
     let width = maxWidth;
@@ -50,8 +53,8 @@ class ResponsiveCanvasManager {
       width = height * this.aspectRatio;
     }
 
-    // Never scale below base resolution to maintain playability
-    const minScale = 0.5;
+    // Floor to keep the game legible; low enough to fit phone screens (~320px wide)
+    const minScale = 0.25;
     const minWidth = this.baseWidth * minScale;
     const minHeight = this.baseHeight * minScale;
 
@@ -65,6 +68,17 @@ class ResponsiveCanvasManager {
       height: Math.floor(height),
       scale: width / this.baseWidth
     };
+  }
+
+  /**
+   * Height used by the other elements in the canvas container (header, instructions)
+   * @returns {number} Reserved height in pixels (0 when it cannot be measured)
+   */
+  getReservedHeight() {
+    const container = this.canvas.parentElement;
+    if (!container) return 0;
+    const reserved = container.offsetHeight - this.canvas.offsetHeight;
+    return Number.isFinite(reserved) && reserved > 0 ? reserved : 0;
   }
 
   /**
@@ -765,17 +779,40 @@ class InputHandler {
    */
   setupListeners() {
     document.addEventListener('keydown', (event) => {
-      if (event.code === 'Space') {
-        event.preventDefault();
-        
-        // Apply debouncing to prevent multiple rapid jump firings
-        const currentTime = Date.now();
-        if (currentTime - this.lastJumpTime > this.jumpDebounceDelay * 1000) {
-          this.lastJumpTime = currentTime;
-          this.gameEngine.jump();
-        }
-      }
+      if (event.code !== 'Space') return;
+      // Also stops Space from scrolling the page or activating a focused button/select
+      event.preventDefault();
+      // Holding Space fires auto-repeat keydowns; only the physical press should jump
+      if (event.repeat) return;
+      this.handleJumpInput();
     });
+
+    // Some browsers activate a focused button on keyup, so block that too
+    document.addEventListener('keyup', (event) => {
+      if (event.code === 'Space') event.preventDefault();
+    });
+
+    // Mouse and touch input on the canvas (pointer events cover both)
+    const canvas = this.gameEngine.canvas;
+    if (canvas && typeof canvas.addEventListener === 'function') {
+      canvas.addEventListener('pointerdown', (event) => {
+        // Ignore right/middle mouse buttons
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        event.preventDefault();
+        this.handleJumpInput();
+      });
+    }
+  }
+
+  /**
+   * Forward a jump to the game engine, debounced to avoid double triggers
+   */
+  handleJumpInput() {
+    const currentTime = Date.now();
+    if (currentTime - this.lastJumpTime > this.jumpDebounceDelay * 1000) {
+      this.lastJumpTime = currentTime;
+      this.gameEngine.jump();
+    }
   }
 }
 
@@ -784,8 +821,9 @@ class InputHandler {
  */
 class ThemeManager {
   constructor() {
-    this.currentTheme = 'light';
-    
+    this.storageKey = 'flappyKiroTheme';
+    this.defaultTheme = 'light';
+
     // Define available themes
     this.themes = {
       light: {
@@ -801,7 +839,8 @@ class ThemeManager {
         skyColor: '#1a1a2e',
         textColor: '#ffffff',
         pipeColor: '#ff6b6b',
-        overlayColor: 'rgba(255, 255, 255, 0.5)',
+        // Dark overlay so the white "Game Over" text stays readable
+        overlayColor: 'rgba(0, 0, 0, 0.5)',
         ghostSprite: 'assets/ghosty.png'
       },
       forest: {
@@ -821,6 +860,34 @@ class ThemeManager {
         ghostSprite: 'assets/ghosty.png'
       }
     };
+
+    // Restore the player's last choice (falls back to the default theme)
+    this.currentTheme = this.loadSavedTheme();
+  }
+
+  /**
+   * Load saved theme name from localStorage
+   * @returns {string} A valid theme name
+   */
+  loadSavedTheme() {
+    try {
+      const saved = localStorage.getItem(this.storageKey);
+      if (saved && this.themes[saved]) return saved;
+    } catch (e) {
+      // localStorage unavailable: use default
+    }
+    return this.defaultTheme;
+  }
+
+  /**
+   * Persist current theme name to localStorage
+   */
+  saveTheme() {
+    try {
+      localStorage.setItem(this.storageKey, this.currentTheme);
+    } catch (e) {
+      // localStorage unavailable: theme just won't persist
+    }
   }
 
   /**
@@ -848,8 +915,9 @@ class ThemeManager {
       this.currentTheme = themeName;
     } else {
       console.warn(`Theme '${themeName}' not found. Using default theme.`);
-      this.currentTheme = 'light';
+      this.currentTheme = this.defaultTheme;
     }
+    this.saveTheme();
   }
 }
 
@@ -893,6 +961,12 @@ class GameEngine {
     this.gameOverAlpha = 0; // Opacity of game over overlay (0 to 1)
     this.gameOverAnimationDuration = 0.3; // seconds for fade-in
     this.gameOverAnimationTime = 0; // current animation time
+    this.readyTime = 0; // time spent on the start screen (drives the hover animation)
+
+    // Game over / restart
+    this.restartDelay = 0.5; // seconds before a restart is accepted after dying
+    this.timeSinceGameOver = 0;
+    this.isNewHighScore = false;
 
     // Sub-systems
     this.audioManager = new AudioManager();
@@ -917,10 +991,16 @@ class GameEngine {
     this.ghost.jumpPower = this.jumpPower;
     this.ghost.terminalVelocity = this.terminalVelocity;
 
+    this.ghostStartY = ghostY;
+
     this.pipes = [];
     this.initializePipePool();
     this.lastPipeTime = 0;
-    this.state = 'PLAYING';
+    // Wait on the start screen until the first jump input
+    this.state = 'INITIAL';
+    this.readyTime = 0;
+    this.timeSinceGameOver = 0;
+    this.isNewHighScore = false;
     this.score = 0;
 
     // Clear particles on new game
@@ -1029,8 +1109,17 @@ class GameEngine {
    * @param {number} deltaTime - Time elapsed since last frame in seconds
    */
   update(deltaTime) {
+    // Start screen: ghost hovers in place, no gravity and no pipes yet
+    if (this.state === 'INITIAL') {
+      this.readyTime += deltaTime;
+      this.ghost.y = this.ghostStartY + Math.sin(this.readyTime * 4) * 8;
+      this.particleSystem.update(deltaTime);
+      return;
+    }
+
     // Update game over overlay animation
     if (this.state === 'GAME_OVER') {
+      this.timeSinceGameOver += deltaTime;
       if (this.gameOverAnimationTime < this.gameOverAnimationDuration) {
         this.gameOverAnimationTime += deltaTime;
         // Ease-in-out cubic easing
@@ -1073,23 +1162,39 @@ class GameEngine {
         return true;
       });
 
+      // Update score before collisions so the final score is settled when the game ends
+      this.updateScore();
+
       // Check collisions
       if (this.checkCollisions()) {
-        // Emit collision effect before game over
-        const ghostCenterX = this.ghost.x + this.ghost.width / 2;
-        const ghostCenterY = this.ghost.y + this.ghost.height / 2;
-        this.particleSystem.emitCollisionEffect(ghostCenterX, ghostCenterY);
-
-        this.state = 'GAME_OVER';
-        this.gameOverAnimationTime = 0; // Start overlay animation
-        this.audioManager.playGameOverSound();
+        this.endGame();
       }
-
-      // Update score
-      this.updateScore();
     } else {
       // Update particles even during game over
       this.particleSystem.update(deltaTime);
+    }
+  }
+
+  /**
+   * Transition to GAME_OVER after a collision
+   */
+  endGame() {
+    // Emit collision effect before game over
+    const ghostCenterX = this.ghost.x + this.ghost.width / 2;
+    const ghostCenterY = this.ghost.y + this.ghost.height / 2;
+    this.particleSystem.emitCollisionEffect(ghostCenterX, ghostCenterY);
+
+    this.state = 'GAME_OVER';
+    this.gameOverAnimationTime = 0; // Start overlay animation
+    this.gameOverAlpha = 0;
+    this.timeSinceGameOver = 0;
+    this.audioManager.playGameOverSound();
+
+    // Save the record right away so it survives even if the tab is closed now
+    if (this.score > this.highScore) {
+      this.highScore = this.score;
+      this.isNewHighScore = true;
+      this.saveHighScore(this.highScore);
     }
   }
 
@@ -1197,17 +1302,26 @@ class GameEngine {
    * Handle jump action
    */
   jump() {
-    if (this.state === 'PLAYING') {
-      this.ghost.jump();
-      this.audioManager.playJumpSound();
-      
-      // Emit jump effect
-      const ghostCenterX = this.ghost.x + this.ghost.width / 2;
-      const ghostCenterY = this.ghost.y + this.ghost.height / 2;
-      this.particleSystem.emitJumpEffect(ghostCenterX, ghostCenterY);
-    } else if (this.state === 'GAME_OVER') {
-      this.reset();
+    if (this.state === 'GAME_OVER') {
+      // Short cooldown so frantic tapping doesn't skip the game over screen
+      if (this.timeSinceGameOver >= this.restartDelay) {
+        this.reset();
+      }
+      return;
     }
+
+    // First input on the start screen begins the run
+    if (this.state === 'INITIAL') {
+      this.state = 'PLAYING';
+    }
+
+    this.ghost.jump();
+    this.audioManager.playJumpSound();
+
+    // Emit jump effect
+    const ghostCenterX = this.ghost.x + this.ghost.width / 2;
+    const ghostCenterY = this.ghost.y + this.ghost.height / 2;
+    this.particleSystem.emitJumpEffect(ghostCenterX, ghostCenterY);
   }
 
   /**
@@ -1263,7 +1377,19 @@ class GameEngine {
     this.ctx.fillStyle = theme.textColor;
     this.ctx.font = '20px Arial';
     this.ctx.fillText(`Score: ${this.score}`, 20, this.canvas.height - 20);
-    this.ctx.fillText(`High: ${this.highScore}`, 200, this.canvas.height - 20);
+    // Show the record climbing live once the current run beats it
+    this.ctx.fillText(`High: ${Math.max(this.highScore, this.score)}`, 200, this.canvas.height - 20);
+
+    // Start screen prompt
+    if (this.state === 'INITIAL') {
+      this.ctx.fillStyle = theme.textColor;
+      this.ctx.textAlign = 'center';
+      this.ctx.font = 'bold 28px Arial';
+      this.ctx.fillText('Flappy Kiro', this.canvas.width / 2, this.canvas.height / 2 - 70);
+      this.ctx.font = '22px Arial';
+      this.ctx.fillText('Press SPACE or tap to start', this.canvas.width / 2, this.canvas.height / 2 + 70);
+      this.ctx.textAlign = 'left';
+    }
 
     // Render game over overlay and prompt with smooth fade-in animation
     if (this.state === 'GAME_OVER') {
@@ -1284,8 +1410,19 @@ class GameEngine {
       this.ctx.font = 'bold 32px Arial';
       this.ctx.textAlign = 'center';
       this.ctx.fillText('Game Over!', this.canvas.width / 2, this.canvas.height / 2 - 40);
-      this.ctx.font = '24px Arial';
-      this.ctx.fillText('Press SPACE to restart', this.canvas.width / 2, this.canvas.height / 2 + 20);
+
+      if (this.isNewHighScore) {
+        this.ctx.fillStyle = `rgba(255, 215, 0, ${this.gameOverAlpha})`;
+        this.ctx.font = 'bold 24px Arial';
+        this.ctx.fillText(`New high score: ${this.highScore}!`, this.canvas.width / 2, this.canvas.height / 2 - 5);
+        this.ctx.fillStyle = `rgba(255, 255, 255, ${this.gameOverAlpha})`;
+      }
+
+      // Only show the prompt once a restart is actually accepted
+      if (this.timeSinceGameOver >= this.restartDelay) {
+        this.ctx.font = '24px Arial';
+        this.ctx.fillText('Press SPACE or tap to restart', this.canvas.width / 2, this.canvas.height / 2 + 35);
+      }
       this.ctx.textAlign = 'left';
     }
   }

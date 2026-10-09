@@ -299,6 +299,9 @@
     </div>
   </div>
 
+  <!-- game.js only creates window.gameEngine when this canvas exists -->
+  <canvas id="gameCanvas" width="800" height="600" hidden></canvas>
+
   <script src="game.js"></script>
   <script>
     let testsPassed = 0;
@@ -357,8 +360,9 @@
         
         // Test 4: ThemeManager
         { name: 'ThemeManager instantiation works', check: () => {
+          // The current theme may come from a saved preference, so just check it's valid
           const tm = new ThemeManager();
-          return tm && tm.currentTheme === 'light';
+          return tm && tm.getAvailableThemes().includes(tm.currentTheme);
         }},
         { name: 'ThemeManager has all themes', check: () => {
           const tm = new ThemeManager();
@@ -368,8 +372,12 @@
         }},
         { name: 'ThemeManager can change theme', check: () => {
           const tm = new ThemeManager();
+          const original = tm.currentTheme;
           tm.setTheme('dark');
-          return tm.currentTheme === 'dark';
+          const changed = tm.currentTheme === 'dark';
+          // setTheme persists the choice, so restore the player's theme
+          tm.setTheme(original);
+          return changed;
         }},
         
         // Test 5: ParticleSystem
@@ -390,6 +398,7 @@
         }},
         { name: 'window.gameEngine is available', check: () => typeof window.gameEngine !== 'undefined' },
         { name: 'Ghost object exists', check: () => window.gameEngine && window.gameEngine.ghost !== null },
+        { name: 'Game waits on the start screen', check: () => window.gameEngine && window.gameEngine.state === 'INITIAL' },
       ];
 
       for (const testCase of tests) {
@@ -431,7 +440,7 @@
     }
 
     function startGame() {
-      alert('🎮 Jogo iniciado!\n\nControles:\n• ESPAÇO = Pular\n• T = Mudar tema\n\nBoa sorte! 🍀');
+      window.location.href = 'index.html';
     }
 
     // Auto-run tests on page load

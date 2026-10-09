@@ -1,276 +1,317 @@
 /**
- * Final Verification Test - Flappy Kiro
- * Tests all critical game functionality
+ * Headless verification for Flappy Kiro
+ * Loads the real game.js with minimal browser mocks and checks gameplay behavior.
+ *
+ * Run: node test-final-verification.js
  */
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
 
-console.log('='.repeat(60));
-console.log('FLAPPY KIRO - FINAL VERIFICATION TEST');
-console.log('='.repeat(60));
+// --- Minimal browser mocks -------------------------------------------------
 
-let testsPassed = 0;
-let testsFailed = 0;
+function createEventTarget(extra = {}) {
+  return Object.assign({
+    listeners: {},
+    addEventListener(type, fn) {
+      (this.listeners[type] = this.listeners[type] || []).push(fn);
+    },
+    dispatch(type, props = {}) {
+      const event = Object.assign({
+        defaultPrevented: false,
+        preventDefault() { this.defaultPrevented = true; }
+      }, props);
+      (this.listeners[type] || []).forEach((fn) => fn(event));
+      return event;
+    }
+  }, extra);
+}
+
+// Canvas context: every drawing method is a no-op, properties are writable
+function createContext2D() {
+  return new Proxy({}, {
+    get(target, prop) {
+      if (prop in target) return target[prop];
+      return () => ({ width: 0 });
+    },
+    set(target, prop, value) {
+      target[prop] = value;
+      return true;
+    }
+  });
+}
+
+function createCanvas({ reservedHeight = 150 } = {}) {
+  const canvas = createEventTarget({
+    width: 800,
+    height: 600,
+    style: {},
+    offsetHeight: 606,
+    getContext: () => createContext2D(),
+    getBoundingClientRect: () => ({ left: 0, top: 0 })
+  });
+  // Container height = canvas + header/instructions around it
+  canvas.parentElement = { offsetHeight: canvas.offsetHeight + reservedHeight };
+  return canvas;
+}
+
+const storage = {};
+const localStorageMock = {
+  getItem: (key) => (Object.prototype.hasOwnProperty.call(storage, key) ? storage[key] : null),
+  setItem: (key, value) => { storage[key] = String(value); },
+  removeItem: (key) => { delete storage[key]; },
+  clear: () => { Object.keys(storage).forEach((k) => delete storage[k]); }
+};
+
+let audioPlays = [];
+class AudioMock {
+  constructor(src) { this.src = src; this.currentTime = 0; }
+  play() { audioPlays.push(this.src); return Promise.resolve(); }
+}
+
+class ImageMock {
+  constructor() { this.src = ''; this.onerror = null; }
+}
+
+const documentMock = createEventTarget({
+  readyState: 'complete',
+  // Returning null makes game.js skip its auto-start; tests create engines themselves
+  getElementById: () => null
+});
+
+const sandbox = {
+  console: { log() {}, warn() {}, error() {} }, // keep game logs out of the report
+  document: documentMock,
+  localStorage: localStorageMock,
+  Audio: AudioMock,
+  Image: ImageMock,
+  requestAnimationFrame: () => {},
+  setTimeout: () => {},
+  innerWidth: 1366,
+  innerHeight: 768
+};
+sandbox.window = sandbox;
+sandbox.addEventListener = () => {};
+
+const context = vm.createContext(sandbox);
+vm.runInContext(fs.readFileSync(path.join(__dirname, 'game.js'), 'utf8'), context);
+const { GameEngine, ThemeManager } = vm.runInContext('({ GameEngine, ThemeManager })', context);
+
+// --- Test helpers ----------------------------------------------------------
+
+let passed = 0;
+let failed = 0;
 
 function test(name, fn) {
+  // Fresh state for every test
+  localStorageMock.clear();
+  documentMock.listeners = {};
+  audioPlays = [];
+  sandbox.innerWidth = 1366;
+  sandbox.innerHeight = 768;
   try {
     fn();
-    console.log(`✓ ${name}`);
-    testsPassed++;
+    console.log(`  PASS  ${name}`);
+    passed++;
   } catch (error) {
-    console.log(`✗ ${name}`);
-    console.log(`  Error: ${error.message}`);
-    testsFailed++;
+    console.log(`  FAIL  ${name}\n        ${error.message}`);
+    failed++;
   }
 }
 
-// Test 1: Check required classes exist
-test('GameObject class exists', () => {
-  if (typeof GameObject !== 'function') throw new Error('GameObject not defined');
-});
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
+}
 
-test('Ghost class exists', () => {
-  if (typeof Ghost !== 'function') throw new Error('Ghost not defined');
-});
+function newEngine(canvasOptions) {
+  const canvas = createCanvas(canvasOptions);
+  const engine = new GameEngine(canvas);
+  return { engine, canvas };
+}
 
-test('Pipe class exists', () => {
-  if (typeof Pipe !== 'function') throw new Error('Pipe not defined');
-});
-
-test('ParticleSystem class exists', () => {
-  if (typeof ParticleSystem !== 'function') throw new Error('ParticleSystem not defined');
-});
-
-test('Particle class exists', () => {
-  if (typeof Particle !== 'function') throw new Error('Particle not defined');
-});
-
-test('AudioManager class exists', () => {
-  if (typeof AudioManager !== 'function') throw new Error('AudioManager not defined');
-});
-
-test('ThemeManager class exists', () => {
-  if (typeof ThemeManager !== 'function') throw new Error('ThemeManager not defined');
-});
-
-test('GameEngine class exists', () => {
-  if (typeof GameEngine !== 'function') throw new Error('GameEngine not defined');
-});
-
-test('InputHandler class exists', () => {
-  if (typeof InputHandler !== 'function') throw new Error('InputHandler not defined');
-});
-
-test('UIController class exists', () => {
-  if (typeof UIController !== 'function') throw new Error('UIController not defined');
-});
-
-// Test 2: Test Ghost physics
-test('Ghost can be instantiated', () => {
-  const ghost = new Ghost(100, 100, 30, 30, 600);
-  if (!ghost) throw new Error('Ghost instantiation failed');
-});
-
-test('Ghost has correct initial state', () => {
-  const ghost = new Ghost(100, 100, 30, 30, 600);
-  if (ghost.velocityY !== 0) throw new Error('Initial velocityY should be 0');
-  if (ghost.gravity !== 600) throw new Error('Gravity not set correctly');
-});
-
-test('Ghost physics - gravity increases velocity', () => {
-  const ghost = new Ghost(100, 100, 30, 30, 600);
-  const initialVelocity = ghost.velocityY;
-  ghost.update(0.1); // 100ms
-  if (ghost.velocityY <= initialVelocity) throw new Error('Gravity should increase velocity');
-});
-
-test('Ghost can jump', () => {
-  const ghost = new Ghost(100, 100, 30, 30, 600);
-  ghost.jumpPower = 300;
-  ghost.jump();
-  if (ghost.velocityY >= 0) throw new Error('Jump should set negative velocity');
-});
-
-test('Ghost has terminal velocity cap', () => {
-  const ghost = new Ghost(100, 100, 30, 30, 600);
-  ghost.terminalVelocity = 400;
-  ghost.velocityY = 500; // Exceeds terminal velocity
-  ghost.update(0.1);
-  if (ghost.velocityY > 400) throw new Error('Terminal velocity not enforced');
-});
-
-test('Ghost getBounds works', () => {
-  const ghost = new Ghost(50, 60, 30, 30, 600);
-  const bounds = ghost.getBounds();
-  if (bounds.left !== 50) throw new Error('Bounds left incorrect');
-  if (bounds.top !== 60) throw new Error('Bounds top incorrect');
-  if (bounds.right !== 80) throw new Error('Bounds right incorrect');
-  if (bounds.bottom !== 90) throw new Error('Bounds bottom incorrect');
-});
-
-// Test 3: Test Pipe
-test('Pipe can be instantiated', () => {
-  const pipe = new Pipe(800, 0, 80, 150, 120, 200, 800, 600);
-  if (!pipe) throw new Error('Pipe instantiation failed');
-});
-
-test('Pipe moves with correct speed', () => {
-  const pipe = new Pipe(800, 0, 80, 150, 120, 200, 800, 600);
-  const initialX = pipe.x;
-  pipe.update(0.1); // 100ms at 200 px/s = 20px
-  if (Math.abs((initialX - pipe.x) - 20) > 1) throw new Error('Pipe movement speed incorrect');
-});
-
-test('Pipe detects off-screen', () => {
-  const pipe = new Pipe(-100, 0, 80, 150, 120, 200, 800, 600);
-  if (!pipe.isOffScreen()) throw new Error('Pipe off-screen detection failed');
-});
-
-test('Pipe gap bounds are correct', () => {
-  const pipe = new Pipe(100, 0, 80, 150, 120, 200, 800, 600);
-  const gap = pipe.getGapBounds();
-  if (gap.top !== 150) throw new Error('Gap top incorrect');
-  if (gap.bottom !== 270) throw new Error('Gap bottom incorrect');
-});
-
-// Test 4: Test Collision Detection (AABB)
-test('AABB collision works - overlapping boxes', () => {
-  const bounds1 = { left: 0, right: 50, top: 0, bottom: 50 };
-  const bounds2 = { left: 25, right: 75, top: 25, bottom: 75 };
-  
-  // AABB collision function (recreate here)
-  const collision = !(
-    bounds1.right < bounds2.left ||
-    bounds1.left > bounds2.right ||
-    bounds1.bottom < bounds2.top ||
-    bounds1.top > bounds2.bottom
-  );
-  
-  if (!collision) throw new Error('AABB should detect overlapping boxes');
-});
-
-test('AABB collision works - non-overlapping boxes', () => {
-  const bounds1 = { left: 0, right: 50, top: 0, bottom: 50 };
-  const bounds2 = { left: 100, right: 150, top: 100, bottom: 150 };
-  
-  const collision = !(
-    bounds1.right < bounds2.left ||
-    bounds1.left > bounds2.right ||
-    bounds1.bottom < bounds2.top ||
-    bounds1.top > bounds2.bottom
-  );
-  
-  if (collision) throw new Error('AABB should not detect non-overlapping boxes');
-});
-
-// Test 5: Test ThemeManager
-test('ThemeManager can be instantiated', () => {
-  const tm = new ThemeManager();
-  if (!tm) throw new Error('ThemeManager instantiation failed');
-});
-
-test('ThemeManager has default theme', () => {
-  const tm = new ThemeManager();
-  if (tm.currentTheme !== 'light') throw new Error('Default theme should be light');
-});
-
-test('ThemeManager returns theme object', () => {
-  const tm = new ThemeManager();
-  const theme = tm.getTheme();
-  if (!theme || !theme.skyColor || !theme.ghostSprite) throw new Error('Theme object invalid');
-});
-
-test('ThemeManager has all required themes', () => {
-  const tm = new ThemeManager();
-  const themes = tm.getAvailableThemes();
-  const required = ['light', 'dark', 'forest', 'sunset'];
-  for (let t of required) {
-    if (!themes.includes(t)) throw new Error(`Missing theme: ${t}`);
+// Let the ghost fall until it hits the ground (no input)
+function runUntilGameOver(engine, maxFrames = 600) {
+  for (let i = 0; i < maxFrames && engine.state !== 'GAME_OVER'; i++) {
+    engine.update(1 / 60);
   }
+}
+
+function pressSpace(props = {}) {
+  return documentMock.dispatch('keydown', Object.assign({ code: 'Space', repeat: false }, props));
+}
+
+// --- Tests -----------------------------------------------------------------
+
+console.log('\nFlappy Kiro - headless verification\n');
+
+console.log('Start screen');
+test('game starts on the start screen, not falling', () => {
+  const { engine } = newEngine();
+  assert(engine.state === 'INITIAL', `expected INITIAL, got ${engine.state}`);
+  const startY = engine.ghostStartY;
+  for (let i = 0; i < 180; i++) engine.update(1 / 60); // 3 seconds idle
+  assert(engine.state === 'INITIAL', 'game should keep waiting for input');
+  assert(Math.abs(engine.ghost.y - startY) <= 8.01, 'ghost should only hover around its start position');
+  assert(engine.pipes.length === 0, 'no pipes before the run starts');
 });
 
-test('ThemeManager can set theme', () => {
-  const tm = new ThemeManager();
-  tm.setTheme('dark');
-  if (tm.currentTheme !== 'dark') throw new Error('Theme change failed');
+test('first Space press starts the run with a jump', () => {
+  const { engine } = newEngine();
+  pressSpace();
+  assert(engine.state === 'PLAYING', `expected PLAYING, got ${engine.state}`);
+  assert(engine.ghost.velocityY < 0, 'ghost should move up');
+  assert(audioPlays.some((src) => src.includes('jump')), 'jump sound should play');
 });
 
-// Test 6: Test ParticleSystem
-test('ParticleSystem can be instantiated', () => {
-  const ps = new ParticleSystem();
-  if (!ps) throw new Error('ParticleSystem instantiation failed');
+console.log('Input');
+test('holding Space (auto-repeat) does not trigger extra jumps', () => {
+  const { engine } = newEngine();
+  pressSpace();
+  engine.ghost.velocityY = 100; // falling
+  engine.inputHandler.lastJumpTime = 0; // rule out the debounce
+  const event = pressSpace({ repeat: true });
+  assert(engine.ghost.velocityY === 100, 'repeat keydown must be ignored');
+  assert(event.defaultPrevented, 'repeat keydown should still be prevented (no page scroll)');
 });
 
-test('ParticleSystem emits jump particles', () => {
-  const ps = new ParticleSystem();
-  ps.emitJumpEffect(100, 100, 8);
-  if (ps.particles.length !== 8) throw new Error('Jump particles not emitted correctly');
+test('Space keyup is prevented (focused buttons are not activated)', () => {
+  newEngine();
+  const event = documentMock.dispatch('keyup', { code: 'Space' });
+  assert(event.defaultPrevented, 'keyup Space should be prevented');
 });
 
-test('ParticleSystem updates particles', () => {
-  const ps = new ParticleSystem();
-  ps.emitJumpEffect(100, 100, 1);
-  const particleBefore = ps.particles[0].y;
-  ps.update(0.1);
-  if (ps.particles.length === 0) throw new Error('Particle died too quickly');
-  if (ps.particles[0].y === particleBefore) throw new Error('Particle position not updated');
+test('tapping the canvas jumps (touch support)', () => {
+  const { engine, canvas } = newEngine();
+  const event = canvas.dispatch('pointerdown', { pointerType: 'touch', button: 0 });
+  assert(engine.state === 'PLAYING', 'tap should start the run');
+  assert(engine.ghost.velocityY < 0, 'tap should jump');
+  assert(event.defaultPrevented, 'tap default should be prevented');
 });
 
-// Test 7: Test GameEngine (DOM required - skip if no canvas)
-if (typeof document !== 'undefined' && document.getElementById('gameCanvas')) {
-  test('GameEngine can be instantiated', () => {
-    const canvas = document.getElementById('gameCanvas');
-    if (!canvas) throw new Error('Canvas element not found');
-    const engine = new GameEngine(canvas);
-    if (!engine) throw new Error('GameEngine instantiation failed');
-  });
+test('right mouse button does not jump', () => {
+  const { engine, canvas } = newEngine();
+  canvas.dispatch('pointerdown', { pointerType: 'mouse', button: 2 });
+  assert(engine.state === 'INITIAL', 'right click should be ignored');
+});
 
-  test('GameEngine has ThemeManager initialized', () => {
-    const canvas = document.getElementById('gameCanvas');
-    const engine = new GameEngine(canvas);
-    if (!engine.themeManager) throw new Error('ThemeManager not initialized');
-  });
+console.log('Game over and high score');
+test('falling to the ground ends the game and plays the sound once', () => {
+  const { engine } = newEngine();
+  engine.jump();
+  runUntilGameOver(engine);
+  assert(engine.state === 'GAME_OVER', 'ghost should die on the ground');
+  for (let i = 0; i < 30; i++) engine.update(1 / 60);
+  const plays = audioPlays.filter((src) => src.includes('game_over')).length;
+  assert(plays === 1, `game over sound should play once, played ${plays}`);
+});
 
-  test('GameEngine has Ghost', () => {
-    const canvas = document.getElementById('gameCanvas');
-    const engine = new GameEngine(canvas);
-    if (!engine.ghost) throw new Error('Ghost not created');
-  });
+test('new high score is saved at game over, without restarting', () => {
+  const { engine } = newEngine();
+  engine.jump();
+  engine.score = 7;
+  runUntilGameOver(engine);
+  assert(localStorageMock.getItem('flappyKiroHighScore') === '7', 'high score should be in localStorage');
+  assert(engine.highScore === 7, 'engine high score should update');
+  assert(engine.isNewHighScore === true, 'new record flag should be set');
+});
 
-  test('GameEngine can jump', () => {
-    const canvas = document.getElementById('gameCanvas');
-    const engine = new GameEngine(canvas);
-    const velocityBefore = engine.ghost.velocityY;
+test('lower score does not overwrite the record', () => {
+  localStorageMock.setItem('flappyKiroHighScore', '10');
+  const { engine } = newEngine();
+  assert(engine.highScore === 10, 'stored record should load');
+  engine.jump();
+  engine.score = 3;
+  runUntilGameOver(engine);
+  assert(localStorageMock.getItem('flappyKiroHighScore') === '10', 'record must stay 10');
+  assert(engine.isNewHighScore === false, 'no new record flag');
+});
+
+test('restart is ignored during the cooldown, then returns to the start screen', () => {
+  const { engine } = newEngine();
+  engine.jump();
+  engine.score = 4;
+  runUntilGameOver(engine);
+  engine.jump();
+  assert(engine.state === 'GAME_OVER', 'immediate press should not restart');
+  engine.update(0.6);
+  engine.jump();
+  assert(engine.state === 'INITIAL', `expected INITIAL after restart, got ${engine.state}`);
+  assert(engine.score === 0, 'score resets');
+  assert(engine.highScore === 4, 'high score kept after restart');
+  assert(engine.ghost.y === engine.ghostStartY, 'ghost back at start position');
+});
+
+console.log('Gameplay preservation');
+test('passing through a gap scores exactly once', () => {
+  const { engine } = newEngine();
+  engine.jump();
+  engine.ghost.gravity = 0;
+  engine.ghost.velocityY = 0;
+  const pipe = engine.acquirePipeFromPool();
+  pipe.gapY = engine.ghost.y - 45; // 120px gap around the 30px ghost
+  pipe.x = engine.ghost.x + engine.ghost.width / 2 - pipe.width / 2 + 2; // just before the center line
+  pipe.scored = false;
+  engine.pipes.push(pipe);
+  for (let i = 0; i < 60; i++) engine.update(1 / 60);
+  assert(engine.state === 'PLAYING', 'ghost inside the gap should not collide');
+  assert(engine.score === 1, `expected score 1, got ${engine.score}`);
+});
+
+test('render works in every state and theme', () => {
+  const { engine } = newEngine();
+  for (const theme of engine.themeManager.getAvailableThemes()) {
+    engine.setTheme(theme);
+    engine.init();
+    engine.render(); // INITIAL
     engine.jump();
-    if (engine.ghost.velocityY >= velocityBefore) throw new Error('Jump did not change velocity');
-  });
+    engine.render(); // PLAYING
+    runUntilGameOver(engine);
+    engine.update(0.6);
+    engine.render(); // GAME_OVER
+  }
+});
 
-  test('GameEngine has window.gameEngine reference', () => {
-    if (!window.gameEngine) throw new Error('window.gameEngine not defined');
-  });
-}
+console.log('Themes');
+test('theme choice persists across reloads', () => {
+  const tm = new ThemeManager();
+  tm.setTheme('forest');
+  assert(localStorageMock.getItem('flappyKiroTheme') === 'forest', 'theme should be saved');
+  assert(new ThemeManager().currentTheme === 'forest', 'new manager should restore it');
+});
 
-// Final Summary
-console.log('\n' + '='.repeat(60));
-console.log(`TESTS PASSED: ${testsPassed}`);
-console.log(`TESTS FAILED: ${testsFailed}`);
-console.log('='.repeat(60));
+test('invalid saved theme falls back to light', () => {
+  localStorageMock.setItem('flappyKiroTheme', 'bogus');
+  assert(new ThemeManager().currentTheme === 'light', 'should fall back to light');
+});
 
-if (testsFailed === 0) {
-  console.log('\n✓ ALL TESTS PASSED! 🎉');
-  console.log('Your Flappy Kiro game is working correctly!');
-} else {
-  console.log(`\n✗ ${testsFailed} test(s) failed. Please check the errors above.`);
-}
+test('dark theme overlay is dark (white text stays readable)', () => {
+  const tm = new ThemeManager();
+  const rgb = tm.themes.dark.overlayColor.match(/\d+/g).slice(0, 3).map(Number);
+  assert(rgb.every((c) => c < 100), `overlay too light: ${rgb}`);
+});
 
-console.log('\n📋 Game Features:');
-console.log('  ✓ Physics simulation (gravity, jumping, terminal velocity)');
-console.log('  ✓ Collision detection (AABB)');
-console.log('  ✓ Pipe generation and movement');
-console.log('  ✓ Particle effects (jump, collision, gap pass)');
-console.log('  ✓ Theme system (light, dark, forest, sunset)');
-console.log('  ✓ Audio management (with mute option)');
-console.log('  ✓ Responsive canvas');
-console.log('  ✓ High score persistence (localStorage)');
-console.log('\n🎮 Controls:');
-console.log('  SPACE - Jump');
-console.log('  T - Cycle theme');
-console.log('  🔊 Button - Mute/Unmute');
+console.log('Responsive canvas');
+test('canvas fits a laptop viewport including header and instructions', () => {
+  sandbox.innerWidth = 1366;
+  sandbox.innerHeight = 657;
+  const { canvas } = newEngine({ reservedHeight: 150 });
+  const width = parseInt(canvas.style.width, 10);
+  const height = parseInt(canvas.style.height, 10);
+  assert(height + 150 + 20 <= 657, `canvas too tall: ${height}px`);
+  assert(Math.abs(width / height - 4 / 3) < 0.02, `aspect ratio off: ${width}x${height}`);
+});
+
+test('canvas fits a phone viewport without distortion', () => {
+  sandbox.innerWidth = 375;
+  sandbox.innerHeight = 667;
+  const { canvas } = newEngine({ reservedHeight: 200 });
+  const width = parseInt(canvas.style.width, 10);
+  const height = parseInt(canvas.style.height, 10);
+  assert(width <= 375 * 0.9, `canvas too wide: ${width}px`);
+  assert(Math.abs(width / height - 4 / 3) < 0.02, `aspect ratio off: ${width}x${height}`);
+});
+
+// --- Summary ---------------------------------------------------------------
+
+console.log(`\n${passed} passed, ${failed} failed\n`);
+process.exit(failed === 0 ? 0 : 1);
