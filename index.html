@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Kiro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #1a1a1a;
+      font-family: Arial, sans-serif;
+      padding: 10px;
+    }
+
+    #gameContainer {
+      text-align: center;
+      max-width: 90vw;
+    }
+
+    canvas {
+      border: 3px solid #333;
+      background-color: #87ceeb;
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      max-width: 100%;
+      height: auto;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 20px;
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+    }
+
+    #info {
+      color: #fff;
+      margin-top: 20px;
+      font-size: clamp(12px, 2vw, 18px);
+    }
+
+    #resolutionInfo {
+      color: #888;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    #header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .control-button {
+      background-color: #333;
+      border: 2px solid #555;
+      color: #fff;
+      font-size: 24px;
+      padding: 10px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 50px;
+      height: 50px;
+    }
+
+    .control-button:hover {
+      background-color: #444;
+      border-color: #777;
+    }
+
+    .control-button:active {
+      background-color: #222;
+      border-color: #333;
+    }
+
+    #themeSelector {
+      background-color: #333;
+      border: 2px solid #555;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      height: 50px;
+      min-width: 120px;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    #themeSelector:hover {
+      background-color: #444;
+      border-color: #777;
+    }
+
+    #themeSelector:active {
+      background-color: #222;
+      border-color: #333;
+    }
+
+    #themeSelector option {
+      background-color: #222;
+      color: #fff;
+    }
+
+    #muteIcon {
+      display: inline-block;
+      line-height: 1;
+    }
+
+    #themeLabel {
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <div id="header">
+      <h1>Flappy Kiro</h1>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="themeSelector" id="themeLabel">Theme:</label>
+        <select id="themeSelector" title="Select game theme" aria-label="Select visual theme">
+          <option value="light">Light Mode</option>
+          <option value="dark">Dark Mode</option>
+          <option value="forest">Forest</option>
+          <option value="sunset">Sunset</option>
+        </select>
+      </div>
+      <button id="muteButton" class="control-button" title="Mute/Unmute audio" aria-label="Mute or unmute game audio">
+        <span id="muteIcon">🔊</span>
+      </button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="info">
+      <p>Pressione ESPAÇO para pular | T para alternar temas</p>
+    </div>
+    <div id="resolutionInfo"></div>
+  </div>
+
+  <script src="game.js"></script>
+  <script>
+    // Theme selector functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeSelector = document.getElementById('themeSelector');
+      
+      themeSelector.addEventListener('change', function(e) {
+        // Access gameEngine through window (will be set by game.js)
+        if (typeof window.gameEngine !== 'undefined') {
+          window.gameEngine.setTheme(e.target.value);
+        }
+      });
+
+      // Keyboard shortcut for theme cycling (T key)
+      document.addEventListener('keydown', function(e) {
+        if (e.code === 'KeyT' && typeof window.gameEngine !== 'undefined') {
+          window.gameEngine.cycleTheme();
+          // Update selector to match current theme
+          themeSelector.value = window.gameEngine.getCurrentTheme();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

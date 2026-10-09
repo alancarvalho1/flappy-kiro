@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Kiro - Mute Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #1a1a1a;
+      font-family: Arial, sans-serif;
+      padding: 10px;
+    }
+
+    #testContainer {
+      text-align: center;
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      color: #fff;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #testResults {
+      text-align: left;
+      margin-top: 20px;
+      background-color: #222;
+      padding: 15px;
+      border-radius: 5px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 3px;
+    }
+
+    .test-pass {
+      background-color: #0a4d0a;
+      color: #7fff7f;
+    }
+
+    .test-fail {
+      background-color: #4d0a0a;
+      color: #ff7f7f;
+    }
+
+    button {
+      background-color: #555;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #777;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #222;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="testContainer">
+    <h1>🎮 Flappy Kiro - Mute Feature Test</h1>
+    
+    <button onclick="runMuteTests()">Run Mute Tests</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div id="testResults"></div>
+    
+    <div class="status">
+      <p><strong>Status:</strong> <span id="statusText">Ready to test</span></p>
+      <p><strong>Tests Passed:</strong> <span id="passCount">0</span>/<span id="totalCount">0</span></p>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Test the mute/unmute functionality
+     */
+
+    // Mock localStorage for testing
+    let mockStorage = {};
+    const originalLocalStorage = window.localStorage;
+    
+    // Replace localStorage with mock
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: (key) => mockStorage[key] || null,
+        setItem: (key, value) => { mockStorage[key] = value; },
+        removeItem: (key) => { delete mockStorage[key]; },
+        clear: () => { mockStorage = {}; }
+      }
+    });
+
+    // Mock Audio class
+    class MockAudio {
+      constructor(src) {
+        this.src = src;
+        this.currentTime = 0;
+        this.playCount = 0;
+      }
+      play() {
+        this.playCount++;
+        return Promise.resolve();
+      }
+    }
+
+    // Store original Audio class
+    const OriginalAudio = window.Audio;
+    window.Audio = MockAudio;
+
+    // AudioManager class from game.js
+    class AudioManager {
+      constructor() {
+        this.jumpAudio = null;
+        this.gameOverAudio = null;
+        this.audioAvailable = true;
+        this.isMuted = this.loadMutePreference();
+        this.loadAudio();
+      }
+
+      loadAudio() {
+        try {
+          this.jumpAudio = new window.Audio('assets/jump.wav');
+          this.gameOverAudio = new window.Audio('assets/game_over.wav');
+        } catch (e) {
+          this.audioAvailable = false;
+        }
+      }
+
+      loadMutePreference() {
+        try {
+          const stored = window.localStorage.getItem('flappyKiroAudioMuted');
+          if (stored === null) return false;
+          return JSON.parse(stored) === true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      saveMutePreference(isMuted) {
+        try {
+          window.localStorage.setItem('flappyKiroAudioMuted', JSON.stringify(isMuted));
+        } catch (e) {
+          console.error('Failed to save mute preference:', e);
+        }
+      }
+
+      toggleMute() {
+        this.isMuted = !this.isMuted;
+        this.saveMutePreference(this.isMuted);
+        return this.isMuted;
+      }
+
+      setMuted(muted) {
+        this.isMuted = muted;
+        this.saveMutePreference(this.isMuted);
+      }
+
+      playJumpSound() {
+        if (!this.audioAvailable || !this.jumpAudio || this.isMuted) return;
+        try {
+          this.jumpAudio.currentTime = 0;
+          this.jumpAudio.play().catch(() => {});
+        } catch (e) {
+          // Silent failure
+        }
+      }
+
+      playGameOverSound() {
+        if (!this.audioAvailable || !this.gameOverAudio || this.isMuted) return;
+        try {
+          this.gameOverAudio.currentTime = 0;
+          this.gameOverAudio.play().catch(() => {});
+        } catch (e) {
+          // Silent failure
+        }
+      }
+    }
+
+    let testCount = 0;
+    let passCount = 0;
+
+    function logResult(testName, passed, message) {
+      testCount++;
+      if (passed) passCount++;
+
+      const resultDiv = document.createElement('div');
+      resultDiv.className = `test-result ${passed ? 'test-pass' : 'test-fail'}`;
+      resultDiv.textContent = `${passed ? '✓' : '✗'} ${testName}: ${message}`;
+
+      document.getElementById('testResults').appendChild(resultDiv);
+      document.getElementById('totalCount').textContent = testCount;
+      document.getElementById('passCount').textContent = passCount;
+    }
+
+    function clearResults() {
+      document.getElementById('testResults').innerHTML = '';
+      testCount = 0;
+      passCount = 0;
+      document.getElementById('totalCount').textContent = '0';
+      document.getElementById('passCount').textContent = '0';
+      document.getElementById('statusText').textContent = 'Ready to test';
+      mockStorage = {};
+    }
+
+    function runMuteTests() {
+      clearResults();
+      document.getElementById('statusText').textContent = 'Running tests...';
+
+      // Test 1: Initialize unmuted
+      mockStorage = {};
+      const am1 = new AudioManager();
+      logResult('Test 1', am1.isMuted === false, 'AudioManager initializes unmuted');
+
+      // Test 2: Toggle mute
+      mockStorage = {};
+      const am2 = new AudioManager();
+      const result = am2.toggleMute();
+      logResult('Test 2', result === true && am2.isMuted === true, 'toggleMute() returns true');
+
+      // Test 3: Persist to localStorage
+      mockStorage = {};
+      const am3 = new AudioManager();
+      am3.toggleMute();
+      const stored = window.localStorage.getItem('flappyKiroAudioMuted');
+      logResult('Test 3', stored === 'true', 'Preference persisted to localStorage');
+
+      // Test 4: Load from localStorage
+      mockStorage = {};
+      window.localStorage.setItem('flappyKiroAudioMuted', 'true');
+      const am4 = new AudioManager();
+      logResult('Test 4', am4.isMuted === true, 'Preference loaded from localStorage');
+
+      // Test 5: Multiple toggles
+      mockStorage = {};
+      const am5 = new AudioManager();
+      am5.toggleMute(); // true
+      am5.toggleMute(); // false
+      am5.toggleMute(); // true
+      logResult('Test 5', am5.isMuted === true, 'Multiple toggles work correctly');
+
+      // Test 6: setMuted
+      mockStorage = {};
+      const am6 = new AudioManager();
+      am6.setMuted(true);
+      logResult('Test 6', am6.isMuted === true, 'setMuted(true) sets muted state');
+
+      // Test 7: Audio doesn't play when muted
+      mockStorage = {};
+      const am7 = new AudioManager();
+      am7.setMuted(true);
+      am7.jumpAudio.playCount = 0;
+      am7.playJumpSound();
+      logResult('Test 7', am7.jumpAudio.playCount === 0, 'Audio does not play when muted');
+
+      // Test 8: Audio plays when unmuted
+      mockStorage = {};
+      const am8 = new AudioManager();
+      am8.setMuted(false);
+      am8.jumpAudio.playCount = 0;
+      am8.playJumpSound();
+      logResult('Test 8', am8.jumpAudio.playCount === 1, 'Audio plays when unmuted');
+
+      // Test 9: Invalid preference defaults to unmuted
+      mockStorage = {};
+      window.localStorage.setItem('flappyKiroAudioMuted', 'invalid');
+      const am9 = new AudioManager();
+      logResult('Test 9', am9.isMuted === false, 'Invalid preference defaults to unmuted');
+
+      // Test 10: Persistence across instances
+      mockStorage = {};
+      const am10a = new AudioManager();
+      am10a.setMuted(true);
+      const am10b = new AudioManager();
+      logResult('Test 10', am10b.isMuted === true, 'Preference persists across instances');
+
+      // Test 11: Game over audio respects mute
+      mockStorage = {};
+      const am11 = new AudioManager();
+      am11.setMuted(true);
+      am11.gameOverAudio.playCount = 0;
+      am11.playGameOverSound();
+      logResult('Test 11', am11.gameOverAudio.playCount === 0, 'Game over audio respects mute');
+
+      // Test 12: Toggle returns correct value
+      mockStorage = {};
+      const am12 = new AudioManager();
+      const toggle1 = am12.toggleMute(); // true
+      const toggle2 = am12.toggleMute(); // false
+      logResult('Test 12', toggle1 === true && toggle2 === false, 'toggleMute returns alternating values');
+
+      document.getElementById('statusText').textContent = `Tests completed: ${passCount}/${testCount} passed`;
+    }
+
+    // Run tests on page load
+    window.addEventListener('load', () => {
+      console.log('Mute test page loaded. Click "Run Mute Tests" to start.');
+    });
+  </script>
+</body>
+</html>

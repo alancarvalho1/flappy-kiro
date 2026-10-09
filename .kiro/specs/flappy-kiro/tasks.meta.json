@@ -1,0 +1,695 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Configurar estrutura do projeto e arquivos base": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555158779
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555174294
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555286588
+      }
+    ],
+    "2. Criar classe base GameObject": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555159211
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555174780
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555286984
+      }
+    ],
+    "3. Criar classe GameEngine base": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555159933
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555175041
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555287471
+      }
+    ],
+    "4. Implementar classe Ghost": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555160377
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555293662
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555535781
+      }
+    ],
+    "5.1 Escrever testes de física do Ghost": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555160629
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555539933
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555869159
+      }
+    ],
+    "6. Implementar renderização do Canvas": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555160830
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555540494
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555874294
+      }
+    ],
+    "7. Implementar carregamento e renderização de sprite do Ghost": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555161101
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555540902
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555870094
+      }
+    ],
+    "8. Implementar InputHandler": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555161320
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555293842
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555534982
+      }
+    ],
+    "9.1 Implementar cap de deltaTime máximo": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555161557
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555875660
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555979595
+      }
+    ],
+    "10. Implementar classe Pipe": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555161747
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555541173
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555869533
+      }
+    ],
+    "11. Implementar renderização de Pipes": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555161948
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555875269
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555980368
+      }
+    ],
+    "12. Implementar gerador de Pipes": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555162165
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555874677
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555980056
+      }
+    ],
+    "13.1 Implementar pool de objetos para Pipes (otimização)": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555162329
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555985582
+      },
+      {
+        "executionId": "94b98211-9a63-4d01-ad39-990916e30ad6",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791556454684
+      },
+      {
+        "executionId": "94b98211-9a63-4d01-ad39-990916e30ad6",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791556464116
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791556515672
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557015363
+      }
+    ],
+    "14. Implementar função AABB de colisão": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555162499
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555984515
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791556516011
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557005867
+      }
+    ],
+    "15. Implementar detecção de colisão Ghost vs Pipes": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555162668
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555984731
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791556516569
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557006444
+      }
+    ],
+    "16. Implementar detecção de colisão Ghost vs Limites": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555162911
+      },
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555985332
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791556516796
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557006700
+      }
+    ],
+    "17.1 Escrever testes de colisão": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555163138
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557184122
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557845948
+      }
+    ],
+    "18. Implementar lógica de scoring": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555163376
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557018924
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557179334
+      }
+    ],
+    "19.1 Escrever testes de pontuação": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555163574
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557182724
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557845339
+      }
+    ],
+    "20. Implementar carregamento de High Score": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555163730
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557183083
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557845515
+      }
+    ],
+    "21. Implementar salvamento de High Score": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555163897
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557183425
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557846575
+      }
+    ],
+    "22.1 Escrever testes de persistência": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555164087
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557919707
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558419832
+      }
+    ],
+    "23. Implementar AudioManager": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555164274
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557183746
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557846771
+      }
+    ],
+    "24. Implementar reprodução de som de salto": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555164412
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557853534
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557916298
+      }
+    ],
+    "25.1 Escrever testes de áudio": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555164614
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557920064
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558420449
+      }
+    ],
+    "26. Implementar transição para Game Over": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555164952
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557920375
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558421167
+      }
+    ],
+    "27. Implementar overlay de Game Over": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555165196
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557920896
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558420720
+      }
+    ],
+    "28. Implementar reinício do jogo": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555165384
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558425784
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791562279154
+      }
+    ],
+    "29. Checkpoint - Validar MVP Completo": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555165575
+      }
+    ],
+    "30. Escrever testes de integração do game loop": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555165782
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558426160
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791562279393
+      }
+    ],
+    "31. Escrever testes end-to-end": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555165987
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558426554
+      }
+    ],
+    "32. Implementar dimensões dinâmicas de canvas": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555166241
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791562283602
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791563056926
+      }
+    ],
+    "33. Implementar opções de audio (mute/unmute)": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555166441
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791562283984
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791563057409
+      }
+    ],
+    "34. Adicionar efeitos visuais": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555166637
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791562284344
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791563057969
+      }
+    ],
+    "35. Adicionar animações suaves": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555166855
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791562284539
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791563058672
+      }
+    ],
+    "36. Implementar temas visuais alternativos": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555167060
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791562285132
+      },
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791563058947
+      }
+    ],
+    "37. Adicionar controle de dificuldade": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555167268
+      }
+    ],
+    "38. Implementar suporte mobile": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555167458
+      }
+    ],
+    "5. Implementar movimento vertical do Ghost com limite de teto": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555869788
+      }
+    ],
+    "9. Implementar game loop principal": [
+      {
+        "executionId": "7c5313cd-c54d-4722-9413-c4147ae7db38",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791555979873
+      }
+    ],
+    "13. Implementar remoção de Pipes": [
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557015748
+      }
+    ],
+    "19. Implementar atualização de display de score": [
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557845705
+      }
+    ],
+    "17. Integrar detecção de colisão no game loop": [
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791557846345
+      }
+    ],
+    "22. Integrar persistência de High Score no game over": [
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558420977
+      }
+    ],
+    "25. Implementar reprodução de som de game over": [
+      {
+        "executionId": "0c61cd9d-ab86-4546-bfa9-6b0e15802a91",
+        "chatSessionId": "sess_b9e463a6-302d-4813-b213-47ab59ef94ad",
+        "timestamp": 1791558421412
+      }
+    ]
+  }
+}

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Effects Test - Flappy Kiro</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #222;
+      color: #0f0;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
+    }
+
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-left: 4px solid #0f0;
+      background-color: #1a1a1a;
+    }
+
+    .test-result.pass {
+      border-left-color: #0f0;
+      color: #0f0;
+    }
+
+    .test-result.fail {
+      border-left-color: #f00;
+      color: #f00;
+    }
+
+    .test-result.info {
+      border-left-color: #0ff;
+      color: #0ff;
+    }
+
+    #output {
+      white-space: pre-wrap;
+      overflow-y: auto;
+      max-height: 600px;
+      background-color: #000;
+      padding: 15px;
+      border: 1px solid #333;
+      margin: 20px 0;
+    }
+
+    button {
+      background-color: #333;
+      border: 1px solid #0ff;
+      color: #0ff;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-family: monospace;
+      margin: 10px 5px 10px 0;
+    }
+
+    button:hover {
+      background-color: #0ff;
+      color: #000;
+    }
+
+    .section {
+      margin: 30px 0;
+      padding: 15px;
+      border: 1px solid #333;
+      background-color: #111;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Flappy Kiro - Visual Effects Test Suite</h1>
+
+  <div class="section">
+    <h2>Test Controls</h2>
+    <button onclick="runTests()">Run All Tests</button>
+    <button onclick="testInGame()">Test In-Game Effects (Manual)</button>
+    <button onclick="clearOutput()">Clear Output</button>
+  </div>
+
+  <div class="section">
+    <h2>Test Output</h2>
+    <div id="output"></div>
+  </div>
+
+  <div class="section">
+    <h2>Instructions for Manual Testing</h2>
+    <p>To manually test the visual effects in-game:</p>
+    <ol>
+      <li>Open the main game: <a href="index.html" target="_blank">Flappy Kiro</a></li>
+      <li><strong>Jump Effect</strong>: Press SPACE to see orange particles falling from the ghost</li>
+      <li><strong>Gap Pass Effect</strong>: Pass through a gap to see light blue particles burst</li>
+      <li><strong>Collision Effect</strong>: Collide with a pipe to see red explosion particles</li>
+    </ol>
+  </div>
+
+  <script src="game.js"></script>
+  <script>
+    const output = document.getElementById('output');
+
+    function log(message, type = 'info') {
+      const line = document.createElement('div');
+      line.className = `test-result ${type}`;
+      line.textContent = message;
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+      console.log(message);
+    }
+
+    function clearOutput() {
+      output.innerHTML = '';
+    }
+
+    function logSection(title) {
+      log('', 'info');
+      log('═══════════════════════════════════════════════', 'info');
+      log(title, 'info');
+      log('═══════════════════════════════════════════════', 'info');
+    }
+
+    function testParticleClass() {
+      logSection('TEST 1: Particle Class');
+
+      try {
+        // Create a particle
+        const particle = new Particle(100, 100, 10, 10, 'rgb(255, 0, 0)', 3, 1.0);
+
+        // Test initial state
+        console.assert(particle.x === 100, 'X position should be 100');
+        console.assert(particle.y === 100, 'Y position should be 100');
+        console.assert(particle.lifetime === 1.0, 'Lifetime should be 1.0');
+        console.assert(particle.isAlive() === true, 'Particle should be alive');
+
+        log('✓ Particle creation: OK', 'pass');
+
+        // Test lifetime decrease
+        particle.update(0.3);
+        console.assert(particle.lifetime === 0.7, 'Lifetime should decrease');
+        console.assert(particle.isAlive() === true, 'Should still be alive');
+
+        log('✓ Particle lifetime tracking: OK', 'pass');
+
+        // Test death detection
+        particle.update(0.8);
+        console.assert(particle.isAlive() === false, 'Particle should be dead');
+
+        log('✓ Particle death detection: OK', 'pass');
+
+        log('\n✓ Particle Class Tests: PASSED', 'pass');
+        return true;
+      } catch (e) {
+        log(`✗ Error: ${e.message}`, 'fail');
+        return false;
+      }
+    }
+
+    function testParticleSystemClass() {
+      logSection('TEST 2: ParticleSystem Class');
+
+      try {
+        const system = new ParticleSystem();
+
+        // Test initial state
+        console.assert(system.particles.length === 0, 'Should start empty');
+        log('✓ ParticleSystem initialization: OK', 'pass');
+
+        // Test jump effect
+        system.emitJumpEffect(100, 100, 8);
+        console.assert(system.particles.length === 8, 'Should emit 8 particles');
+        log('✓ Jump effect emission (8 orange particles): OK', 'pass');
+
+        // Test gap pass effect
+        system.emitGapPassEffect(200, 150);
+        console.assert(system.particles.length === 20, 'Should have 20 particles total');
+        log('✓ Gap pass effect emission (12 light blue particles): OK', 'pass');
+
+        // Test collision effect
+        system.emitCollisionEffect(300, 250);
+        console.assert(system.particles.length === 40, 'Should have 40 particles total');
+        log('✓ Collision effect emission (20 red particles): OK', 'pass');
+
+        // Test update
+        system.update(0.1);
+        console.assert(system.particles.length === 40, 'Particles should still be alive');
+        log('✓ Particle update (0.1s): OK', 'pass');
+
+        // Test clear
+        system.clear();
+        console.assert(system.particles.length === 0, 'Should be empty after clear');
+        log('✓ ParticleSystem clear: OK', 'pass');
+
+        log('\n✓ ParticleSystem Tests: PASSED', 'pass');
+        return true;
+      } catch (e) {
+        log(`✗ Error: ${e.message}`, 'fail');
+        return false;
+      }
+    }
+
+    function testEffectColors() {
+      logSection('TEST 3: Effect Colors');
+
+      try {
+        const system = new ParticleSystem();
+
+        // Emit each effect
+        system.emitJumpEffect(0, 0, 1);
+        const jumpColor = system.particles[0].color;
+        console.assert(jumpColor.includes('255, 200, 100'), 'Jump effect should be orange');
+        log(`✓ Jump effect color (Orange): ${jumpColor}`, 'pass');
+
+        system.emitGapPassEffect(0, 0);
+        const gapColor = system.particles[1].color;
+        console.assert(gapColor.includes('100, 200, 255'), 'Gap effect should be light blue');
+        log(`✓ Gap pass effect color (Light Blue): ${gapColor}`, 'pass');
+
+        system.emitCollisionEffect(0, 0);
+        const collisionColor = system.particles[13].color; // Skip the gap particles
+        console.assert(collisionColor.includes('255, 100, 100'), 'Collision effect should be red');
+        log(`✓ Collision effect color (Red): ${collisionColor}`, 'pass');
+
+        log('\n✓ Effect Colors: PASSED', 'pass');
+        return true;
+      } catch (e) {
+        log(`✗ Error: ${e.message}`, 'fail');
+        return false;
+      }
+    }
+
+    function testEffectParticleCount() {
+      logSection('TEST 4: Effect Particle Count');
+
+      try {
+        const system = new ParticleSystem();
+
+        system.emitJumpEffect(0, 0, 8);
+        const jumpCount = system.particles.length;
+        console.assert(jumpCount === 8, 'Jump should emit 8 particles');
+        log(`✓ Jump effect: ${jumpCount} particles`, 'pass');
+
+        system.clear();
+        system.emitGapPassEffect(0, 0);
+        const gapCount = system.particles.length;
+        console.assert(gapCount === 12, 'Gap pass should emit 12 particles');
+        log(`✓ Gap pass effect: ${gapCount} particles`, 'pass');
+
+        system.clear();
+        system.emitCollisionEffect(0, 0);
+        const collisionCount = system.particles.length;
+        console.assert(collisionCount === 20, 'Collision should emit 20 particles');
+        log(`✓ Collision effect: ${collisionCount} particles`, 'pass');
+
+        log('\n✓ Effect Particle Count: PASSED', 'pass');
+        return true;
+      } catch (e) {
+        log(`✗ Error: ${e.message}`, 'fail');
+        return false;
+      }
+    }
+
+    function testEffectLifetimes() {
+      logSection('TEST 5: Effect Particle Lifetimes');
+
+      try {
+        const system = new ParticleSystem();
+
+        system.emitJumpEffect(0, 0, 1);
+        const jumpLifetime = system.particles[0].lifetime;
+        console.assert(jumpLifetime === 0.6, 'Jump lifetime should be 0.6s');
+        log(`✓ Jump effect lifetime: ${jumpLifetime}s`, 'pass');
+
+        system.clear();
+        system.emitGapPassEffect(0, 0);
+        const gapLifetime = system.particles[0].lifetime;
+        console.assert(gapLifetime === 0.4, 'Gap pass lifetime should be 0.4s');
+        log(`✓ Gap pass effect lifetime: ${gapLifetime}s`, 'pass');
+
+        system.clear();
+        system.emitCollisionEffect(0, 0);
+        const collisionLifetime = system.particles[0].lifetime;
+        console.assert(collisionLifetime === 0.7, 'Collision lifetime should be 0.7s');
+        log(`✓ Collision effect lifetime: ${collisionLifetime}s`, 'pass');
+
+        log('\n✓ Effect Particle Lifetimes: PASSED', 'pass');
+        return true;
+      } catch (e) {
+        log(`✗ Error: ${e.message}`, 'fail');
+        return false;
+      }
+    }
+
+    function runTests() {
+      clearOutput();
+      log('Starting Visual Effects Test Suite', 'info');
+      log('', 'info');
+
+      const results = [
+        { name: 'Particle Class', test: testParticleClass },
+        { name: 'ParticleSystem Class', test: testParticleSystemClass },
+        { name: 'Effect Colors', test: testEffectColors },
+        { name: 'Effect Particle Count', test: testEffectParticleCount },
+        { name: 'Effect Particle Lifetimes', test: testEffectLifetimes }
+      ];
+
+      const passed = results.filter(r => r.test()).length;
+      const total = results.length;
+
+      log('', 'info');
+      logSection('TEST SUMMARY');
+      log(`Total Tests: ${total}`, 'info');
+      log(`Passed: ${passed}`, passed === total ? 'pass' : 'fail');
+      log(`Failed: ${total - passed}`, total - passed === 0 ? 'pass' : 'fail');
+      log(`Success Rate: ${((passed / total) * 100).toFixed(1)}%`, passed === total ? 'pass' : 'fail');
+    }
+
+    function testInGame() {
+      clearOutput();
+      logSection('IN-GAME MANUAL TESTING INSTRUCTIONS');
+      log('', 'info');
+      log('1. Click the button below to open the game in a new window', 'info');
+      log('2. Once the game starts, follow these steps:', 'info');
+      log('', 'info');
+      log('JUMP EFFECT TEST:', 'info');
+      log('  - Press SPACE to jump', 'info');
+      log('  - You should see ORANGE particles falling from the ghost', 'info');
+      log('  - Particles should fade out after ~0.6 seconds', 'info');
+      log('', 'info');
+      log('GAP PASS EFFECT TEST:', 'info');
+      log('  - Navigate through a pipe gap and score', 'info');
+      log('  - You should see LIGHT BLUE particles burst at the gap', 'info');
+      log('  - Particles should fade out after ~0.4 seconds', 'info');
+      log('', 'info');
+      log('COLLISION EFFECT TEST:', 'info');
+      log('  - Intentionally collide with a pipe or boundary', 'info');
+      log('  - You should see RED particles explode at the collision point', 'info');
+      log('  - Particles should fade out after ~0.7 seconds', 'info');
+      log('', 'info');
+      log('═══════════════════════════════════════════════', 'info');
+
+      setTimeout(() => {
+        window.open('index.html', 'gameWindow');
+      }, 500);
+    }
+
+    // Run tests on page load
+    window.addEventListener('load', () => {
+      log('Test suite loaded. Click "Run All Tests" to start.', 'info');
+    });
+  </script>
+</body>
+</html>

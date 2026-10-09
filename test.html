@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Kiro - Ghost Physics Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        .test-output {
+            background-color: #0a0a0a;
+            border: 2px solid #00ff00;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .test-summary {
+            background-color: #001a00;
+            border: 2px solid #00ff00;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .passed {
+            color: #00ff00;
+        }
+        .failed {
+            color: #ff0000;
+        }
+        button {
+            background-color: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #00cc00;
+        }
+        .requirements {
+            background-color: #1a1a2e;
+            border-left: 4px solid #00ffff;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Flappy Kiro - Ghost Physics Tests</h1>
+    
+    <div class="requirements">
+        <strong>Requirements Validated:</strong>
+        <ul>
+            <li>11.1: Gravity consistency - change in velocity per frame due to gravity is mathematically consistent</li>
+            <li>11.2: Jump consistency - change in velocity per frame due to jump is mathematically consistent</li>
+        </ul>
+    </div>
+    
+    <button onclick="runTests()">Run All Tests</button>
+    <button onclick="document.getElementById('output').textContent = ''">Clear Output</button>
+    
+    <div id="output" class="test-output">Test output will appear here...</div>
+    
+    <div id="summary" class="test-summary" style="display:none;"></div>
+
+    <script src="game.js"></script>
+    <script>
+        // Test utilities
+        const testOutput = [];
+        const testResults = [];
+
+        function log(message) {
+            testOutput.push(message);
+            document.getElementById('output').textContent = testOutput.join('\n');
+            console.log(message);
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                const errorMsg = `❌ FAILED: ${message}`;
+                log(errorMsg);
+                throw new Error(errorMsg);
+            }
+        }
+
+        // Test Suite
+
+        function testGravityApplication() {
+            const gravity = 600;
+            const ghost = new Ghost(100, 100, 30, 30, gravity);
+            ghost.jumpPower = 300;
+            ghost.terminalVelocity = 400;
+
+            assert(ghost.velocityY === 0, 'Initial velocityY should be 0');
+
+            const deltaTime1 = 0.016;
+            ghost.update(deltaTime1);
+            const expectedVelocity1 = gravity * deltaTime1;
+            assert(
+                Math.abs(ghost.velocityY - expectedVelocity1) < 0.01,
+                `After 1 frame: expected ${expectedVelocity1}, got ${ghost.velocityY}`
+            );
+
+            ghost.update(deltaTime1);
+            const expectedVelocity2 = expectedVelocity1 + gravity * deltaTime1;
+            assert(
+                Math.abs(ghost.velocityY - expectedVelocity2) < 0.01,
+                `After 2 frames: expected ${expectedVelocity2}, got ${ghost.velocityY}`
+            );
+
+            log('✓ testGravityApplication passed');
+            testResults.push({ name: 'Gravity Application', passed: true });
+        }
+
+        function testJumpVelocity() {
+            const ghost = new Ghost(100, 100, 30, 30, 600);
+            ghost.jumpPower = 300;
+            ghost.terminalVelocity = 400;
+
+            assert(ghost.velocityY === 0, 'Initial velocityY should be 0');
+
+            ghost.jump();
+            assert(ghost.velocityY === -300, `After jump: expected -300, got ${ghost.velocityY}`);
+
+            ghost.update(0.016);
+            const expectedAfterGravity = -300 + 600 * 0.016;
+            assert(
+                Math.abs(ghost.velocityY - expectedAfterGravity) < 0.01,
+                `After gravity: expected ${expectedAfterGravity}, got ${ghost.velocityY}`
+            );
+
+            ghost.jump();
+            assert(ghost.velocityY === -300, `After second jump: expected -300, got ${ghost.velocityY}`);
+
+            log('✓ testJumpVelocity passed');
+            testResults.push({ name: 'Jump Velocity', passed: true });
+        }
+
+        function testTerminalVelocity() {
+            const ghost = new Ghost(100, 100, 30, 30, 600);
+            ghost.jumpPower = 300;
+            ghost.terminalVelocity = 400;
+
+            let deltaTime = 0.016;
+            for (let i = 0; i < 42; i++) {
+                ghost.update(deltaTime);
+            }
+
+            assert(
+                ghost.velocityY === ghost.terminalVelocity,
+                `After 42 frames: expected ${ghost.terminalVelocity}, got ${ghost.velocityY}`
+            );
+
+            ghost.update(deltaTime);
+            assert(
+                ghost.velocityY === ghost.terminalVelocity,
+                `Should stay at terminal velocity: got ${ghost.velocityY}`
+            );
+
+            log('✓ testTerminalVelocity passed');
+            testResults.push({ name: 'Terminal Velocity', passed: true });
+        }
+
+        function testPositionClamping() {
+            const ghost = new Ghost(100, 100, 30, 30, 600);
+            ghost.jumpPower = 300;
+            ghost.terminalVelocity = 400;
+
+            // Test top boundary
+            ghost.y = -10;
+            ghost.velocityY = -100;
+            ghost.clampToBounds(0, 600);
+
+            assert(ghost.y === 0, `At top: expected y=0, got y=${ghost.y}`);
+            assert(ghost.velocityY === 0, `At top: expected velocityY=0, got ${ghost.velocityY}`);
+
+            // Test bottom boundary
+            ghost.y = 575;
+            ghost.velocityY = 100;
+            ghost.clampToBounds(0, 600);
+
+            assert(ghost.y === 570, `At bottom: expected y=570, got y=${ghost.y}`);
+            assert(ghost.velocityY === 0, `At bottom: expected velocityY=0, got ${ghost.velocityY}`);
+
+            // Test within bounds
+            ghost.y = 200;
+            ghost.velocityY = 50;
+            ghost.clampToBounds(0, 600);
+
+            assert(ghost.y === 200, `Within bounds: y should not change, got ${ghost.y}`);
+            assert(ghost.velocityY === 50, `Within bounds: velocityY should not change, got ${ghost.velocityY}`);
+
+            log('✓ testPositionClamping passed');
+            testResults.push({ name: 'Position Clamping', passed: true });
+        }
+
+        function testVelocityResetOnClamping() {
+            const ghost = new Ghost(100, 100, 30, 30, 600);
+            ghost.jumpPower = 300;
+            ghost.terminalVelocity = 400;
+
+            // Test velocity reset at top
+            ghost.y = -10;
+            ghost.velocityY = -250;
+            ghost.clampToBounds(0, 600);
+
+            assert(ghost.velocityY === 0, `At top: velocity should reset, got ${ghost.velocityY}`);
+
+            // Test velocity reset at bottom
+            ghost.y = 610;
+            ghost.velocityY = 300;
+            ghost.clampToBounds(0, 600);
+
+            assert(ghost.velocityY === 0, `At bottom: velocity should reset, got ${ghost.velocityY}`);
+
+            // Test velocity NOT reset within bounds
+            ghost.y = 200;
+            ghost.velocityY = 150;
+            ghost.clampToBounds(0, 600);
+
+            assert(ghost.velocityY === 150, `Within bounds: velocity should not reset, got ${ghost.velocityY}`);
+
+            log('✓ testVelocityResetOnClamping passed');
+            testResults.push({ name: 'Velocity Reset on Clamping', passed: true });
+        }
+
+        function testCombinedPhysicsSimulation() {
+            const ghost = new Ghost(100, 300, 30, 30, 600);
+            ghost.jumpPower = 300;
+            ghost.terminalVelocity = 400;
+
+            const deltaTime = 0.016;
+            const initialY = ghost.y;
+
+            // Fall for 0.5 seconds
+            for (let i = 0; i < 31; i++) {
+                ghost.update(deltaTime);
+                ghost.clampToBounds(0, 600);
+            }
+            const yAfterFall = ghost.y;
+            assert(yAfterFall > initialY, `Ghost should fall: y went from ${initialY} to ${yAfterFall}`);
+
+            // Jump
+            ghost.jump();
+            assert(ghost.velocityY === -300, `After jump: expected -300, got ${ghost.velocityY}`);
+
+            // Travel upward then downward
+            let maxY = yAfterFall;
+            for (let i = 0; i < 100; i++) {
+                ghost.update(deltaTime);
+                ghost.clampToBounds(0, 600);
+                maxY = Math.min(maxY, ghost.y);
+            }
+
+            assert(maxY < yAfterFall, `Ghost should jump upward: reached ${maxY} from ${yAfterFall}`);
+
+            log('✓ testCombinedPhysicsSimulation passed');
+            testResults.push({ name: 'Combined Physics Simulation', passed: true });
+        }
+
+        function runTests() {
+            testOutput.length = 0;
+            testResults.length = 0;
+            document.getElementById('summary').style.display = 'none';
+
+            log('=== Starting Ghost Physics Tests ===');
+            log('Requirements: 11.1, 11.2\n');
+
+            try {
+                testGravityApplication();
+                testJumpVelocity();
+                testTerminalVelocity();
+                testPositionClamping();
+                testVelocityResetOnClamping();
+                testCombinedPhysicsSimulation();
+
+                log('\n=== All Ghost Physics Tests PASSED ✓ ===');
+                showSummary(true);
+            } catch (error) {
+                log(`\n✗ Test failed: ${error.message}`);
+                showSummary(false);
+            }
+        }
+
+        function showSummary(allPassed) {
+            const summary = document.getElementById('summary');
+            summary.style.display = 'block';
+            
+            let html = '<h2>Test Summary</h2>';
+            html += `<div class="${allPassed ? 'passed' : 'failed'}">`;
+            html += allPassed ? '✓ ALL TESTS PASSED' : '✗ SOME TESTS FAILED';
+            html += '</div>';
+            
+            html += '<ul>';
+            for (const result of testResults) {
+                const status = result.passed ? '✓' : '✗';
+                const className = result.passed ? 'passed' : 'failed';
+                html += `<li><span class="${className}">${status} ${result.name}</span></li>`;
+            }
+            html += '</ul>';
+            
+            summary.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

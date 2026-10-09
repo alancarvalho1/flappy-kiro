@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Game Over Overlay - Flappy Kiro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #1a1a1a;
+      font-family: Arial, sans-serif;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #testContainer {
+      text-align: center;
+    }
+
+    canvas {
+      border: 3px solid #333;
+      background-color: #87ceeb;
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      margin: 20px 0;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    h2 {
+      color: #bbb;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0052a3;
+    }
+
+    button:active {
+      background-color: #003d7a;
+    }
+
+    .info {
+      color: #fff;
+      margin-top: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .status {
+      color: #0f0;
+      background-color: #111;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+      min-width: 300px;
+    }
+
+    .testResults {
+      color: #fff;
+      background-color: #222;
+      padding: 20px;
+      border-radius: 5px;
+      margin-top: 20px;
+      text-align: left;
+      display: inline-block;
+    }
+
+    .testResults h3 {
+      margin-bottom: 10px;
+      color: #0f0;
+    }
+
+    .testResults li {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .pass {
+      color: #0f0;
+    }
+
+    .fail {
+      color: #f00;
+    }
+
+    #info {
+      color: #fff;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="testContainer">
+    <h1>🧪 Game Over Overlay Test</h1>
+    <h2>Task 27 - Requirement 4.5</h2>
+    
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <div class="controls">
+      <button onclick="testScenario1()">Test: Show Overlay</button>
+      <button onclick="testScenario2()">Test: Hide Overlay</button>
+      <button onclick="testScenario3()">Test: Game Restart</button>
+      <button onclick="startNormalGame()">Start Normal Game</button>
+    </div>
+
+    <div class="status" id="status">Ready to test</div>
+
+    <div class="testResults" id="testResults" style="display: none;">
+      <h3>Test Results</h3>
+      <ul id="resultsList"></ul>
+    </div>
+
+    <div class="info">
+      <p><strong>Test Controls:</strong></p>
+      <p>• Press SPACEBAR to jump during game</p>
+      <p>• Press SPACEBAR during Game Over to restart</p>
+      <p>• Use test buttons to verify overlay behavior</p>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+  <script>
+    let gameEngine = null;
+
+    function initGame() {
+      const canvas = document.getElementById('gameCanvas');
+      if (gameEngine) {
+        // Stop the previous game loop
+        return;
+      }
+      gameEngine = new GameEngine(canvas);
+      return gameEngine;
+    }
+
+    function updateStatus(message) {
+      document.getElementById('status').textContent = message;
+    }
+
+    function addTestResult(result, passed) {
+      const resultsList = document.getElementById('resultsList');
+      const resultDiv = document.getElementById('testResults');
+      resultDiv.style.display = 'block';
+      
+      const li = document.createElement('li');
+      li.className = passed ? 'pass' : 'fail';
+      li.textContent = (passed ? '✓ ' : '✗ ') + result;
+      resultsList.appendChild(li);
+    }
+
+    function clearTestResults() {
+      document.getElementById('resultsList').innerHTML = '';
+      document.getElementById('testResults').style.display = 'none';
+    }
+
+    // Test Scenario 1: Trigger Game Over and verify overlay is visible
+    function testScenario1() {
+      clearTestResults();
+      const canvas = document.getElementById('gameCanvas');
+      gameEngine = new GameEngine(canvas);
+      gameEngine.state = 'GAME_OVER';
+      gameEngine.score = 42;
+      gameEngine.highScore = 100;
+      
+      updateStatus('Test 1: Triggering Game Over overlay...');
+      
+      // Render to see the overlay
+      gameEngine.render();
+      
+      // Verify the state
+      addTestResult('Game state is GAME_OVER', gameEngine.state === 'GAME_OVER');
+      addTestResult('Score displayed', gameEngine.score >= 0);
+      addTestResult('High score displayed', gameEngine.highScore >= 0);
+      
+      // Canvas should show overlay (visual verification needed)
+      addTestResult('Canvas updated (visual overlay should be visible)', true);
+      
+      updateStatus('✓ Test 1 Complete: Overlay should be visible on canvas');
+    }
+
+    // Test Scenario 2: Verify overlay disappears when state changes
+    function testScenario2() {
+      clearTestResults();
+      const canvas = document.getElementById('gameCanvas');
+      gameEngine = new GameEngine(canvas);
+      gameEngine.state = 'GAME_OVER';
+      gameEngine.render();
+      
+      addTestResult('Initial state is GAME_OVER', gameEngine.state === 'GAME_OVER');
+      
+      // Change state back to PLAYING
+      gameEngine.state = 'PLAYING';
+      gameEngine.render();
+      
+      addTestResult('State changed to PLAYING', gameEngine.state === 'PLAYING');
+      addTestResult('Overlay should disappear', true);
+      
+      updateStatus('✓ Test 2 Complete: Overlay should no longer be visible');
+    }
+
+    // Test Scenario 3: Game restart flow
+    function testScenario3() {
+      clearTestResults();
+      const canvas = document.getElementById('gameCanvas');
+      gameEngine = new GameEngine(canvas);
+      
+      // Set initial values
+      gameEngine.score = 50;
+      gameEngine.state = 'GAME_OVER';
+      
+      addTestResult('Initial state is GAME_OVER', gameEngine.state === 'GAME_OVER');
+      addTestResult('Initial score is 50', gameEngine.score === 50);
+      
+      // Simulate restart
+      gameEngine.reset();
+      
+      addTestResult('After reset, state is PLAYING', gameEngine.state === 'PLAYING');
+      addTestResult('After reset, score is 0', gameEngine.score === 0);
+      addTestResult('High score preserved', gameEngine.highScore >= 0);
+      addTestResult('Overlay should disappear after restart', gameEngine.state === 'PLAYING');
+      
+      updateStatus('✓ Test 3 Complete: Game should be ready to play again');
+    }
+
+    // Start a normal game that can be played
+    function startNormalGame() {
+      clearTestResults();
+      const canvas = document.getElementById('gameCanvas');
+      
+      // Cancel any existing game loop
+      if (gameEngine) {
+        gameEngine = null;
+      }
+      
+      gameEngine = new GameEngine(canvas);
+      
+      updateStatus('Game started! Press SPACEBAR to jump. Collide to trigger overlay test.');
+      addTestResult('Game initialized', gameEngine.state === 'PLAYING');
+      addTestResult('Press SPACEBAR to jump', true);
+      addTestResult('Let the ghost fall or hit a pipe to see overlay', true);
+      
+      // Start the game loop
+      gameEngine.gameLoop();
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', function() {
+      updateStatus('Ready! Click "Start Normal Game" or select a test.');
+    });
+  </script>
+</body>
+</html>

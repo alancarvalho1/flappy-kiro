@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>Flappy Kiro - Quick Test</title>
+  <style>
+    body { margin: 0; padding: 20px; background: #222; color: #fff; }
+    canvas { border: 2px solid #fff; display: block; margin: 20px 0; }
+    .result { font-size: 18px; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    .success { background: #2ecc71; color: white; }
+    .error { background: #e74c3c; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Flappy Kiro - Game Initialization Test</h1>
+  <div id="results"></div>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <script src="game.js"></script>
+  <script>
+    const resultsDiv = document.getElementById('results');
+
+    function addResult(message, success) {
+      const div = document.createElement('div');
+      div.className = 'result ' + (success ? 'success' : 'error');
+      div.textContent = (success ? '✓' : '✗') + ' ' + message;
+      resultsDiv.appendChild(div);
+    }
+
+    try {
+      // Test 1: Check if window.gameEngine is defined
+      if (typeof window.gameEngine !== 'undefined') {
+        addResult('GameEngine initialized successfully', true);
+      } else {
+        addResult('GameEngine is NOT initialized', false);
+      }
+
+      // Test 2: Check if ThemeManager exists
+      if (window.gameEngine && window.gameEngine.themeManager) {
+        addResult('ThemeManager is initialized', true);
+      } else {
+        addResult('ThemeManager is NOT initialized', false);
+      }
+
+      // Test 3: Check if we can get current theme
+      if (window.gameEngine && window.gameEngine.getCurrentTheme) {
+        const theme = window.gameEngine.getCurrentTheme();
+        addResult('Current theme: ' + theme, true);
+      } else {
+        addResult('Cannot get current theme', false);
+      }
+
+      // Test 4: Check if ghost exists
+      if (window.gameEngine && window.gameEngine.ghost) {
+        addResult('Ghost object created', true);
+      } else {
+        addResult('Ghost object NOT created', false);
+      }
+
+      // Test 5: Try to get available themes
+      if (window.gameEngine && window.gameEngine.themeManager) {
+        const themes = window.gameEngine.themeManager.getAvailableThemes();
+        addResult('Available themes: ' + themes.join(', '), themes.length > 0);
+      }
+
+      console.log('All tests completed!');
+
+    } catch (error) {
+      addResult('Error: ' + error.message, false);
+      console.error('Test error:', error);
+    }
+  </script>
+</body>
+</html>
